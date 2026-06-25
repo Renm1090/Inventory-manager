@@ -1,0 +1,26 @@
+# Entorno virtual
+.venv/
+venv/
+env/
+
+# Caché de Python
+__pycache__/
+*.pyc
+
+# Bases de datos (¡IMPORTANTE PARA TU APK!)
+# Excluimos la DB de pruebas para que no se incluya en el build
+data/database.db
+*.db
+*.sqlite3
+
+# Carpetas de compilación de Flet/Flutter
+build/
+dist/
+.flet/
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Archivos de sistema
+.DS_Store
