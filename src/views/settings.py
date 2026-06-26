@@ -10,7 +10,7 @@ from src.database import (
     get_all_products, 
     get_movements_data
 )
-from src.theme import get_theme_colors, border_all, get_download_directory
+from src.theme import get_theme_colors, border_all
 
 def settings_view(page: ft.Page):
     colors = get_theme_colors(page)
@@ -36,31 +36,24 @@ def settings_view(page: ft.Page):
         )
 
     # Helpers de exportación
-    def export_to_csv():
-        download_dir = get_download_directory()
-        filepath = os.path.join(download_dir, "productos_inventario.csv")
+    def generate_csv_bytes():
+        import io
         products = get_all_products()
-        
-        with open(filepath, "w", newline="", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(["ID", "Nombre", "Cantidad", "Unidad", "Stock Minimo"])
-            for p in products:
-                writer.writerow([p["id"], p["name"], p["quantity"], p["unidad"], p["critical"]])
-        return filepath
+        f = io.StringIO()
+        writer = csv.writer(f)
+        writer.writerow(["ID", "Nombre", "Cantidad", "Unidad", "Stock Minimo"])
+        for p in products:
+            writer.writerow([p["id"], p["name"], p["quantity"], p["unidad"], p["critical"]])
+        return f.getvalue().encode('utf-8')
 
-    def export_to_json():
-        download_dir = get_download_directory()
-        filepath = os.path.join(download_dir, "inventario_completo.json")
+    def generate_json_bytes():
         products = get_all_products()
         movements = get_movements_data()
-        
         data = {
             "productos": products,
             "movimientos": movements
         }
-        with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=4, ensure_ascii=False)
-        return filepath
+        return json.dumps(data, indent=4, ensure_ascii=False).encode('utf-8')
 
     def close_modal(modal):
         page.pop_dialog()
@@ -75,17 +68,63 @@ def settings_view(page: ft.Page):
             value="CSV"
         )
         
-        def run_export(e):
+        async def run_export(e):
             selected = formats.value
             page.pop_dialog()
             
             try:
                 if selected == "CSV":
-                    path = export_to_csv()
-                    show_toast(f"CSV exportado en: {path}", ft.Colors.BLUE_700)
+                    csv_bytes = generate_csv_bytes()
+                    
+                    # Intento de guardado directo en la carpeta pública "Download" de Android
+                    if page.platform == ft.PagePlatform.ANDROID:
+                        for possible_path in ["/storage/emulated/0/Download", "/sdcard/Download"]:
+                            if os.path.exists(possible_path):
+                                try:
+                                    filepath = os.path.join(possible_path, "productos_inventario.csv")
+                                    with open(filepath, "wb") as f:
+                                        f.write(csv_bytes)
+                                    show_toast(f"CSV guardado en Descargas: {filepath}", ft.Colors.BLUE_700)
+                                    return
+                                except Exception:
+                                    pass
+                    
+                    path = await page.save_file_dialog.save_file(
+                        file_name="productos_inventario.csv",
+                        allowed_extensions=["csv"],
+                        src_bytes=csv_bytes
+                    )
+                    if path:
+                        if page.platform not in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS]:
+                            with open(path, "wb") as f:
+                                f.write(csv_bytes)
+                        show_toast("CSV guardado correctamente", ft.Colors.BLUE_700)
                 elif selected == "JSON":
-                    path = export_to_json()
-                    show_toast(f"JSON exportado en: {path}", ft.Colors.BLUE_700)
+                    json_bytes = generate_json_bytes()
+                    
+                    # Intento de guardado directo en la carpeta pública "Download" de Android
+                    if page.platform == ft.PagePlatform.ANDROID:
+                        for possible_path in ["/storage/emulated/0/Download", "/sdcard/Download"]:
+                            if os.path.exists(possible_path):
+                                try:
+                                    filepath = os.path.join(possible_path, "inventario_completo.json")
+                                    with open(filepath, "wb") as f:
+                                        f.write(json_bytes)
+                                    show_toast(f"JSON guardado en Descargas: {filepath}", ft.Colors.BLUE_700)
+                                    return
+                                except Exception:
+                                    pass
+                    
+                    path = await page.save_file_dialog.save_file(
+                        file_name="inventario_completo.json",
+                        allowed_extensions=["json"],
+                        src_bytes=json_bytes
+                    )
+                    if path:
+                        if page.platform not in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS]:
+                            with open(path, "wb") as f:
+                                f.write(json_bytes)
+                        show_toast("JSON guardado correctamente", ft.Colors.BLUE_700)
             except Exception as ex:
                 show_toast(f"Error al exportar: {str(ex)}", ft.Colors.RED_700)
 

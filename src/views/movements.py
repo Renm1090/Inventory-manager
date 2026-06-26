@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 from fpdf import FPDF
 from src.database import get_movements_data
-from src.theme import get_theme_colors, border_all, get_download_directory
+from src.theme import get_theme_colors, border_all
 
 def safe_str(s):
     # FPDF2 por defecto con fuentes estándar soporta latin-1. Evita caídas de codificación unicode.
@@ -30,15 +30,33 @@ def movements_view(page: ft.Page, save_file_dialog: ft.FilePicker):
             page.show_dialog(ft.SnackBar(content=ft.Text(f"No hay registros de {table_name.lower()}.")))
             return
 
-        # Abrimos el selector de archivos
+        pdf_bytes = generate_pdf_bytes(data_to_export, table_name)
+
+        # Intento de guardado directo en la carpeta pública "Download" de Android
+        if page.platform == ft.PagePlatform.ANDROID:
+            for possible_path in ["/storage/emulated/0/Download", "/sdcard/Download"]:
+                if os.path.exists(possible_path):
+                    try:
+                        filepath = os.path.join(possible_path, f"{table_name}_reporte.pdf")
+                        with open(filepath, "wb") as f:
+                            f.write(pdf_bytes)
+                        page.show_dialog(ft.SnackBar(content=ft.Text(f"PDF guardado en Descargas: {filepath}")))
+                        return
+                    except Exception:
+                        pass
+
+        # Abrimos el selector de archivos (FilePicker) de respaldo
         try:
             path = await save_file_dialog.save_file(
                 file_name=f"{table_name}_reporte.pdf",
-                allowed_extensions=["pdf"]
+                allowed_extensions=["pdf"],
+                src_bytes=pdf_bytes
             )
             if path:
-                # Generamos el PDF directamente en la ruta elegida por el usuario
-                generate_pdf(data_to_export, table_name, path)
+                # Si estamos en escritorio (no móvil), escribimos el archivo localmente
+                if page.platform not in [ft.PagePlatform.ANDROID, ft.PagePlatform.IOS]:
+                    with open(path, "wb") as f:
+                        f.write(pdf_bytes)
                 page.show_dialog(ft.SnackBar(content=ft.Text("PDF guardado correctamente")))
         except Exception as ex:
             import traceback
@@ -247,7 +265,7 @@ def movements_view(page: ft.Page, save_file_dialog: ft.FilePicker):
         )
     ], spacing=16, scroll=ft.ScrollMode.ADAPTIVE, alignment=ft.MainAxisAlignment.START, key=f"movements_view_{page.theme_mode}")
 
-def generate_pdf(data, table_name, path):
+def generate_pdf_bytes(data, table_name):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", 'B', 16)
@@ -269,5 +287,4 @@ def generate_pdf(data, table_name, path):
         pdf.cell(30, 10, safe_str(f"{e['quantity_movement']}"), 1)
         pdf.cell(40, 10, safe_str(e['responsable']), 1, ln=True)
         
-    pdf.output(path)
-    return True
+    return bytes(pdf.output())
