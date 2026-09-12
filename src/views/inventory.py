@@ -487,5 +487,5 @@ def inventory_view(page: ft.Page):
                 color=ft.Colors.with_opacity(0.05, ft.Colors.BLACK)
             )
         )
-    ], spacing=14, expand=True, alignment=ft.MainAxisAlignment.START, key=f"inventory_view_{page.theme_mode}")
+    ], spacing=14, scroll=ft.ScrollMode.ADAPTIVE, alignment=ft.MainAxisAlignment.START, key=f"inventory_view_{page.theme_mode}") 
 

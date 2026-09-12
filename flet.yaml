@@ -1,0 +1,7 @@
+app:
+  name: "Gestor de Inventario"
+  description: "App de control de inventario y movimientos"
+  version: "1.2.0"
+  build_number: "3"
+  org: "com.renm.inventario"
+  icon: "assets/icon.png"

@@ -245,10 +245,10 @@ def settings_view(page: ft.Page):
                     padding=10
                 ),
                 ft.Text("Gestor de Inventario Móvil", size=16, weight=ft.FontWeight.BOLD, color=colors["text_main"], text_align=ft.TextAlign.CENTER),
-                ft.Text("Versión: 1.0.0-Estable\nTecnología: Python + Flet (Flutter)\nBase de Datos: SQLite 3", size=12, color=colors["text_sub"], text_align=ft.TextAlign.CENTER),
+                ft.Text("Versión: 1.2.0-Estable\nTecnología: Python + Flet (Flutter)\nBase de Datos: SQLite 3", size=12, color=colors["text_sub"], text_align=ft.TextAlign.CENTER),
                 ft.Divider(color=colors["divider"]),
-                ft.Text("Optimizado para control de almacén rápido y responsivo en pantallas de celulares.", size=11, italic=True, color=colors["text_sub"], text_align=ft.TextAlign.CENTER),
-                ft.Text("Autor: Renm", size=11, italic=True, color=colors["text_sub"], text_align=ft.TextAlign.CENTER)
+                ft.Text("Optimizado para control de almacén rápido y responsivo en pantallas moviles.", size=11, italic=True, color=colors["text_sub"], text_align=ft.TextAlign.CENTER),
+                ft.Text("Desarrollador: Renm", size=11, italic=True, color=colors["text_sub"], text_align=ft.TextAlign.CENTER)
             ], spacing=8, tight=True, horizontal_alignment=ft.CrossAxisAlignment.CENTER),
             actions=[
                 ft.TextButton("Entendido", on_click=lambda _: close_modal(modal), style=ft.ButtonStyle(color=colors["text_button"]))
@@ -257,24 +257,42 @@ def settings_view(page: ft.Page):
         )
         page.show_dialog(modal)
 
+
     # 1. Grupo: Datos e Historial
     group_data = ft.Container(
         content=ft.Column([
             ft.Text("Datos e Historial", size=12, weight=ft.FontWeight.BOLD, color=colors["text_sub"]),
-            ft.ListTile(
-                leading=make_icon_container(ft.Icons.DOWNLOAD_ROUNDED, ft.Colors.BLUE_700),
-                title=ft.Text("Exportar Inventario Completo", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
-                subtitle=ft.Text("Descargar en CSV o JSON", size=11, color=colors["text_sub"]),
-                trailing=ft.Icon(ft.Icons.ARROW_FORWARD_IOS_ROUNDED, size=14, color=colors["text_sub"]),
-                on_click=show_export_modal
+            ft.Container(height=4),
+            # Opción 1: Exportar
+            ft.Container(
+                content=ft.Row([
+                    make_icon_container(ft.Icons.DOWNLOAD_ROUNDED, ft.Colors.BLUE_700),
+                    ft.Column([
+                        ft.Text("Exportar Inventario Completo", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
+                        ft.Text("Descargar en CSV o JSON", size=11, color=colors["text_sub"])
+                    ], spacing=2, expand=True),
+                    ft.Icon(ft.Icons.ARROW_FORWARD_IOS_ROUNDED, size=14, color=colors["text_sub"])
+                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, spacing=12),
+                on_click=show_export_modal,
+                ink=True,
+                padding=8,
+                border_radius=8
             ),
             ft.Divider(color=colors["divider"], height=1),
-            ft.ListTile(
-                leading=make_icon_container(ft.Icons.STORAGE_ROUNDED, ft.Colors.TEAL_600),
-                title=ft.Text("Gestión de Base de Datos", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
-                subtitle=ft.Text("Copias de seguridad y optimización", size=11, color=colors["text_sub"]),
-                trailing=ft.Icon(ft.Icons.ARROW_FORWARD_IOS_ROUNDED, size=14, color=colors["text_sub"]),
-                on_click=show_db_modal
+            # Opción 2: Base de Datos
+            ft.Container(
+                content=ft.Row([
+                    make_icon_container(ft.Icons.STORAGE_ROUNDED, ft.Colors.TEAL_600),
+                    ft.Column([
+                        ft.Text("Gestión de Base de Datos", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
+                        ft.Text("Copias de seguridad y optimización", size=11, color=colors["text_sub"])
+                    ], spacing=2, expand=True),
+                    ft.Icon(ft.Icons.ARROW_FORWARD_IOS_ROUNDED, size=14, color=colors["text_sub"])
+                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, spacing=12),
+                on_click=show_db_modal,
+                ink=True,
+                padding=8,
+                border_radius=8
             ),
         ], spacing=4),
         bgcolor=colors["card_bg"],
@@ -287,29 +305,42 @@ def settings_view(page: ft.Page):
     group_preferences = ft.Container(
         content=ft.Column([
             ft.Text("Preferencias", size=12, weight=ft.FontWeight.BOLD, color=colors["text_sub"]),
-            ft.ListTile(
-                leading=make_icon_container(ft.Icons.LIGHT_MODE_ROUNDED, ft.Colors.AMBER_600),
-                title=ft.Text("Modo Claro", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
-                subtitle=ft.Text("Cambiar tema de la interfaz", size=11, color=colors["text_sub"]),
-                trailing=ft.Switch(
-                    value=page.theme_mode == ft.ThemeMode.LIGHT,
-                    active_color=ft.Colors.TEAL_400,
-                    on_change=lambda e: page.toggle_theme(e.control.value)
-                ),
+            ft.Container(height=4),
+            # Opción 1: Modo Claro
+            ft.Container(
+                content=ft.Row([
+                    make_icon_container(ft.Icons.LIGHT_MODE_ROUNDED, ft.Colors.AMBER_600),
+                    ft.Column([
+                        ft.Text("Modo Claro", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
+                        ft.Text("Cambiar tema de la interfaz", size=11, color=colors["text_sub"])
+                    ], spacing=2, expand=True),
+                    ft.Switch(
+                        value=page.theme_mode == ft.ThemeMode.LIGHT,
+                        active_color=ft.Colors.TEAL_400,
+                        on_change=lambda e: page.toggle_theme(e.control.value)
+                    ),
+                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, spacing=12),
+                padding=8
             ),
             ft.Divider(color=colors["divider"], height=1),
-            ft.ListTile(
-                leading=make_icon_container(ft.Icons.NOTIFICATIONS_ROUNDED, ft.Colors.PURPLE_600),
-                title=ft.Text("Notificaciones de Stock", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
-                subtitle=ft.Text("Alertas de stock crítico activas", size=11, color=colors["text_sub"]),
-                trailing=ft.Switch(
-                    value=True, 
-                    active_color=ft.Colors.PURPLE_500, 
-                    on_change=lambda e: show_toast(
-                        "Notificaciones activadas" if e.control.value else "Notificaciones desactivadas", 
-                        colors["text_sub"]
-                    )
-                ),
+            # Opción 2: Notificaciones
+            ft.Container(
+                content=ft.Row([
+                    make_icon_container(ft.Icons.NOTIFICATIONS_ROUNDED, ft.Colors.PURPLE_600),
+                    ft.Column([
+                        ft.Text("Notificaciones de Stock", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
+                        ft.Text("Alertas de stock crítico activas", size=11, color=colors["text_sub"])
+                    ], spacing=2, expand=True),
+                    ft.Switch(
+                        value=True, 
+                        active_color=ft.Colors.PURPLE_500, 
+                        on_change=lambda e: show_toast(
+                            "Notificaciones activadas" if e.control.value else "Notificaciones desactivadas", 
+                            colors["text_sub"]
+                        )
+                    ),
+                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, spacing=12),
+                padding=8
             ),
         ], spacing=4),
         bgcolor=colors["card_bg"],
@@ -322,12 +353,20 @@ def settings_view(page: ft.Page):
     group_about = ft.Container(
         content=ft.Column([
             ft.Text("Soporte y Aplicación", size=12, weight=ft.FontWeight.BOLD, color=colors["text_sub"]),
-            ft.ListTile(
-                leading=make_icon_container(ft.Icons.INFO_OUTLINE_ROUNDED, ft.Colors.GREY_700),
-                title=ft.Text("Información de la Aplicación", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
-                subtitle=ft.Text("Versión del sistema y créditos", size=11, color=colors["text_sub"]),
-                trailing=ft.Icon(ft.Icons.ARROW_FORWARD_IOS_ROUNDED, size=14, color=colors["text_sub"]),
-                on_click=show_info_modal
+            ft.Container(height=4),
+            ft.Container(
+                content=ft.Row([
+                    make_icon_container(ft.Icons.INFO_OUTLINE_ROUNDED, ft.Colors.GREY_700),
+                    ft.Column([
+                        ft.Text("Información de la Aplicación", size=14, weight=ft.FontWeight.W_500, color=colors["text_main"]),
+                        ft.Text("Versión del sistema y créditos", size=11, color=colors["text_sub"])
+                    ], spacing=2, expand=True),
+                    ft.Icon(ft.Icons.ARROW_FORWARD_IOS_ROUNDED, size=14, color=colors["text_sub"])
+                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN, spacing=12),
+                on_click=show_info_modal,
+                ink=True,
+                padding=8,
+                border_radius=8
             ),
         ], spacing=4),
         bgcolor=colors["card_bg"],
@@ -350,4 +389,3 @@ def settings_view(page: ft.Page):
         group_preferences,
         group_about
     ], spacing=16, scroll=ft.ScrollMode.ADAPTIVE, alignment=ft.MainAxisAlignment.START, key=f"settings_view_{page.theme_mode}")
-
